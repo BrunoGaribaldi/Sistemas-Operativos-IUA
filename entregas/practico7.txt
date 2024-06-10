@@ -1,0 +1,238 @@
+//utiliza el data.txt
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <string.h>
+#include <unistd.h>
+#define TAM 64
+
+int CalcularFila(void);
+
+int main(){
+    int fila = CalcularFila();
+    char c;
+    int arreglo[fila][8], mayor=0;
+    FILE *fp;
+    int proc_num=0, tiempo_arribo=0, tamanio=0, tiempo_final=0, contador=0;
+	fp = fopen("data.txt","r");
+	int i, j;
+    // Mostrar ejecucion
+    /* for (int clock = 0; clock < 200; clock++)
+    {
+        printf("\nClock: %d\t", clock);
+        for (int i = 0; i < fila; i++)
+        {
+            if (arreglo[i][1]==clock)
+            {
+                printf("Empezando a ejecutar proceso %d", arreglo[i][0]);
+            }
+            if (arreglo[i][3]>=clock&&arreglo[i][1]<clock)
+            {
+                printf("Ejecutando %d \t", arreglo[i][0]);
+            }
+            if (arreglo[i][3]+1==clock)
+            {
+                printf("Finalizando %d \t", arreglo[i][0]);
+            }
+            
+            
+        }   
+    }
+    */
+    for(i = 0; i < fila; i++) {
+		j = 0;
+		do {
+			fscanf(fp, "%d %d %d %d", &proc_num, &tiempo_arribo, &tamanio, &tiempo_final);
+            arreglo[i][0]=proc_num;
+            arreglo[i][1]=tiempo_arribo;
+            arreglo[i][2]=tamanio;
+            arreglo[i][3]=tiempo_final;
+            arreglo[i][4]=0;
+            arreglo[i][5]=0;
+            arreglo[i][6]=0;
+            arreglo[i][7]=0;
+            if (tiempo_final>mayor)
+            {
+                mayor=tiempo_final;
+            }
+            
+			j++;
+		} while((c = fgetc(fp)) != '\n');
+        }
+        for (int i = 0; i < fila; i++)
+        {
+            printf("%d\t%d\t%d\t%d\n", arreglo[i][0], arreglo[i][1],arreglo[i][2],arreglo[i][3]);
+        }
+
+    int mem[TAM]={0};
+    //MENU
+    char opcion = 'c';
+        switch (opcion)
+        {
+        case 'a': //ESTATICO CON PARTICIONES FIJAS DE 8MB.
+                {
+                    for (int clock = 0; clock < 300; clock++)
+                    {
+                        printf("\nClock: %d\t", clock);
+                        for (int i = 0; i < TAM; i++)
+                        {
+                            printf("%d", mem[i]);
+                            if ((i+1)%8==0)
+                            {
+                                printf(" ");
+                            }
+                            
+                        }
+                        printf("\n");
+                        for (int i = 0; i < fila; i++)
+                        {
+                            if (arreglo[i][1]-1==clock)
+                            {
+                                for (int t = 0; t < 64; t+=8)
+                                {
+                                    if ((mem[t]==0)  && (arreglo[i][6]==0))
+                                    {
+                                        printf("Empezando a ejecutar proceso %d, posicion %d", arreglo[i][0],t);
+                                        for (int j = 0; j < arreglo[i][2]; j++)
+                                        {
+                                            mem[t+j]=arreglo[i][0];
+                                        }
+                                        arreglo[i][4]=t;
+                                        arreglo[i][5]= arreglo[i][3]-arreglo[i][1]+clock+2+arreglo[i][7];
+                                        arreglo[i][6]=1;
+                                        break;
+                                    }     
+                                    else if (t==56 && arreglo[i][6]==0){
+                                        printf("No hay espacio para ejecutar %d\t", arreglo[i][0]);
+                                        arreglo[i][1]+=1;
+                                        arreglo[i][7]+=1;
+                                    }                
+                                }                
+                            }
+                            if (arreglo[i][5]==clock+1)
+                            {
+                                printf("\nFinalizando Proceso %d\n", arreglo[i][0]);
+                                
+                                printf("Termina en %d \n", arreglo[i][5]-1);
+                                for (int j = 0; j < 8; j++)
+                                {
+                                    mem[arreglo[i][4]+j]=0;
+                                }
+                            }
+                            
+                            
+                        }   
+                    }  
+                }
+            break;
+        case 'b': //ESTATICO CON PARTICIONES FIJAS DE 4 + 4 + 4 + 4 + 8 + 8 + 8 + 8 + 8 + 8.
+        {
+            for (int clock = 0; clock < 250; clock++)
+            {
+                int s = 4;
+                printf("\nClock: %d\t", clock);
+                for (int i = 0; i < TAM; i++)
+                {
+                    printf("%d", mem[i]);
+                    if ((i+1)%4==0 && i<16)
+                    {
+                        printf(" ");
+                    } else if ((i+1)%8==0)
+                    {
+                        printf(" ");
+                    } 
+                }
+                printf("\n");
+                for (int i = 0; i < fila; i++)
+                {
+                    if (arreglo[i][1]-1==clock)
+                    {
+                        for (int t = 0; t < 64; t+=s)
+                        {
+                            if ((mem[t]==0)  && (arreglo[i][6]==0) && t<16) // Particiones de 4 Bits
+                            {
+                                if (arreglo[i][2]<=4){
+                                    printf("Empezando a ejecutar proceso %d, posicion %d", arreglo[i][0],t);
+                                    for (int j = 0; j < arreglo[i][2]; j++)
+                                    {
+                                        mem[t+j]=arreglo[i][0];
+                                    }
+                                    arreglo[i][4]=t;
+                                    arreglo[i][5]= arreglo[i][3]-arreglo[i][1]+clock+2+arreglo[i][7];
+                                    arreglo[i][6]=1;
+                                    break;
+                                }
+                            }   else if ((mem[t]==0)  && (arreglo[i][6]==0) && t>16) // Particiones de 8 Bits
+                            {
+                                if (arreglo[i][2]<=8){
+                                    printf("Empezando a ejecutar proceso %d, posicion %d", arreglo[i][0],t);
+                                    for (int j = 0; j < arreglo[i][2]; j++)
+                                    {
+                                        mem[t+j]=arreglo[i][0];
+                                    }
+                                    arreglo[i][4]=t;
+                                    arreglo[i][5]= arreglo[i][3]-arreglo[i][1]+clock+2+arreglo[i][7];
+                                    arreglo[i][6]=1;
+                                    break;
+                                }
+                            }     
+                            else if (t==56 && arreglo[i][6]==0){
+                                printf("No hay espacio para ejecutar %d\t", arreglo[i][0]);
+                                arreglo[i][1]+=1;
+                                arreglo[i][7]+=1;
+                            }   
+                            if (t>13) {s = 8;}          
+                        }                
+                    }
+                    if (arreglo[i][5]==clock+1)
+                    {
+                        printf("\nFinalizando Proceso %d\n", arreglo[i][0]);
+                        
+                        printf("Termina en %d \n", arreglo[i][5]-1);
+                        if (arreglo[i][4]<16)
+                        {
+                            for (int j = 0; j < 4; j++)
+                            {
+                                mem[arreglo[i][4]+j]=0;
+                            }
+                        }
+                        if (arreglo[i][4]>16)
+                        {
+                            for (int j = 0; j < 8; j++)
+                            {
+                                mem[arreglo[i][4]+j]=0;
+                            }
+                        }
+                    }
+                    
+                    
+                }   
+            }  
+        }
+        default:
+            break;
+        }
+}
+
+int CalcularFila (){
+    FILE *fp;
+	char c;
+	fp = fopen("data.txt","r");
+	if ( fp == NULL )
+	{
+		printf("No se puede abrir el archivo");
+	}
+	int fila=0;
+	int columna;
+	while((c = fgetc(fp)) != EOF)
+	{
+		if(c == '\n'){
+			fila++;
+		}
+	}
+	fclose(fp);
+    return fila;
+}

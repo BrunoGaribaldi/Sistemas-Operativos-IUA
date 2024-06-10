@@ -1,0 +1,36 @@
+Sistemas Operativos - Practico - Threads ( Hilos )
+--------------------------------------------------
+
+Objetivo: Manejo de hilos. Uso de POSIX Threads
+
+Referencias:
+a- https://computing.llnl.gov/tutorials/pthreads/
+b- https://www.cs.cf.ac.uk/Dave/C/
+
+
+1) Compile el ejemplo que crea 5 hilos (4-threads.c) utilizando:
+
+    $ gcc -Wall -pthread -o ht ht.c
+
+Notas cobre el ejemplo:
+a) pthread_create crea el hilo, 
+   el primer argumento almacena el Id del Hilo,
+   el segundo pasa parámetros iniciales
+   el tercero indica cual es la función que ejecuta el hilo, 
+   el cuarto es el *unico* argumento que podemos pasar al hilo.
+
+b) Todos los hilos deben invocar pthread_exit al terminar.
+
+2) Use 5 hilos para computar los 5 primeros términos de la serie de Fibonacci
+
+0 1 1 2 3 5 8 13 ...
+a_n = a_n-1 + a_n-2
+
+Use una expresión no recursiva para la función de la serie.
+Declare un arreglo común donde cada hilo debe almacenar el resultado.
+Imprima el arreglo al finalizar
+
+Piense de que modo 'sicronizar' al hilo principal, recuerde que las variables
+globales son comunes.
+
+

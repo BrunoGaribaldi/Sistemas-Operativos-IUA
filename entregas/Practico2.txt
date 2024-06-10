@@ -1,0 +1,81 @@
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define NUM_THREADS     10
+
+int fibonacci[NUM_THREADS] ={0};
+
+//otra forma. de esta forma no necesitaria el pthread_join, es como que levantas todos los hilos al mismo tiempo y despues ellos van viendo cuando es su turno
+//variable globarl int turno = 0;
+/*
+void *runner(void *param){
+   int *tid = param;
+   while(*tid != turno){ //condicion de espera
+   }
+   if(*tid == 0){  
+    }else{
+        if (*tid == 1)
+        {
+            fibonacci[1]=1;
+        }else{
+             fibonacci[*tid] = fibonacci[*tid - 1] + fibonacci[*tid - 2];
+        }
+    }
+   pthread_exit(0);
+}
+  struct dirent *entry;
+*/
+void *runner(void *param){
+    int *tid = param;
+  printf("Thread #%ld: Starting...\n", *tid);
+    // Simular trabajo
+    printf("Thread #%ld: Working...\n", *tid);
+    // Simular trabajo
+    if(*tid == 0){  
+    }else{
+        if (*tid == 1)
+        {
+            fibonacci[1]=1;
+        }else{
+             fibonacci[*tid] = fibonacci[*tid - 1] + fibonacci[*tid - 2];
+        }
+    }
+    printf("\nFIBONACCI = %d\n",fibonacci[*tid]);
+   
+    
+    printf("Thread #%ld: Exiting...\n\n\n\n\n\n\n", *tid);
+
+
+   
+   pthread_exit(0);
+}
+
+
+
+int main (int argc, char *argv[])
+{
+   pthread_t threads[NUM_THREADS];
+   pthread_attr_t attr;
+   int rc;
+   int t;
+   
+   for ( t = 0; t < NUM_THREADS; t++ ) {
+      printf("In main: creating thread %d\n", t);
+      pthread_attr_init( &attr );
+      
+      rc = pthread_create( &threads[t], &attr, runner, (void *) &t );
+      
+      if ( rc ) {
+         printf("ERROR; return code from pthread_create() is %d\n", rc);
+         exit(-1);
+      }
+      pthread_join(threads[t], NULL);
+   }
+
+   sleep(2);
+
+   /* End main thread */
+   pthread_exit(NULL);
+}

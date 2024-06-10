@@ -1,0 +1,119 @@
+Sistemas Operativos - Archivo estructurado
+------------------------------------------
+
+1) Archivo estructurado
+El objetivo de esta práctica es aprender a leer un archivo estructurado.
+En particular utilizaremos como ejemplo un archivo en formato ISO2709. Es un
+formato desarrollado para almacenar información bibliográfica, y se corresponde
+con el formato MARC21 que es utilizado en la Argentina.
+
+La relevancia para el tema de archivos es que se puede ver a un registro
+MARC21 como un mini-filesystem, con entradas de directorio de tamaño fijo
+y bloques de datos variables.
+
+Un archivo en formato ISO2709 está constituido por
+  1) Uno a más registros (1+)
+  2) Cada registro posee una cabecera de tamaño fijo
+  3) Cada registro posee uno o más campos (tags) (1+)
+  4) Cada campo posee cero o más subcampos (0+)
+
+Es un ejemplo de un formato diseñado para ser leido por computadoras... de los
+años 60's. Sin embargo es el formato más utilizado internacionalmente.
+
+Un registro MARC21 se puede ver como lo siguiente
+
+01030nam a22002657a 4500
+003 AR_CdUFM
+005 20160503150707.0
+008 111121s2015    nju||||| |||| 00| 0 eng d
+020    $a 013359162X
+020    $a 9780133591620
+040    $a AR_CdUFM $c AR_CdUFM
+100 1  $a Tanenbaum, Andrew S., $d 1944-
+245 10 $a Modern operating systems / $c Andrew S. Tanenbaum, Herbert Bos.
+250    $a 4a ed.
+260    $a New Jersey :  $b Pearson Education,  $c 2015.
+300    $a xxvi, 2001 p. : $b il. ; $c 25 cm.
+
+Podemos observar:
+1) Cabecera de 21 chars contando espacios
+2) Campos (003,005,...,300)
+3) Subcampos
+   003 ninguno
+   020 uno ($a)
+   260 tres ($a,$b,$c)
+
+No interesa a los fines del práctico cual es el significado de cada campo, pero
+podemos observar que 020 es el ISBN, 100 autor, 245 titulo, 260 editor
+
+El formato ISO2709 se desarrolló para almacenar registros MARC21, codificando
+la información presente. Conociendo cual es la estructura del formato ISO2709
+debemos aprender a 'decodificar' la información.
+
+La información está codificada en un "directorio" el cual indica donde están
+los datos ("archivos"), su tamaño y estructura
+
+Entonces:
+
+A) Escriba un programa que lea e interprete el archivo de ejemplo osbooks.iso2709
+
+Para poder interpretar el archivo utilice la información de https://www.loc.gov/marc/specifications/specrecstruc.html
+Procese el archivo e imprima su información
+
+Discusión
+---------
+Se desea obtener un comportamiento similar al del programa yaz-marcdump (paquete yaz),
+que genera una salida como
+$ yaz-marcdump -i marc -o line osbooks.iso2709
+
+00856nam a22002537a 4500
+003 AR_CdUFM
+005 20160503150707.0
+008 111121s2015    nju||||| |||| 00| 0 eng d
+020    $a 013359162X
+020    $a 9780133591620
+040    $a AR_CdUFM $c AR_CdUFM
+100 1  $a Tanenbaum, Andrew S., $d 1944-
+245 10 $a Modern operating systems / $c Andrew S. Tanenbaum, Herbert Bos.
+250    $a 4a ed.
+260    $a New Jersey :  $b Pearson Education,  $c 2015.
+300    $a xxvi, 2001 p. : $b il. ; $c 25 cm.
+504    $a Incluye bibliografía e índice.
+541    $a Ciencia y Técnica de Edwin Ventura Oscanova ; $c Compra Programa de Bibliotecas 2015 ;  $d 2016-05-03 ; $e 22577 ; $h $3.900 ; $o Libro
+650  4 $a Operating systems.
+653    $a Sistemas operativos.
+700 1  $a Bos, Herbert
+942    $c LIBRO $2 CCS
+945    $a MCR $d 2016-05-03
+999    $c 17560 $d 17558
+
+Lo que se ve aquí es similar a https://catalogo.iua.edu.ar/cgi-bin/koha/opac-MARCdetail.pl?biblionumber=2161
+
+En resumen, como seria la cosa
+.....       .....
+012345678901234567890123
+00856nam a22002537a 4500 //cabera fijate los primeros 5 caracteres me indican el tamaño del archivo, y del 12 al 16 me indica donde arrancan los datos
+012345678901
+003 0009 00000 //a partir de aca directorio. me dice los prieros 3 la etiqueta, los otros 4 el largo y los ultimos 5 me indican desde donde de la parte de datos arranca ese dato
+005 0017 00009
+008 0041 00026
+020 0015 00067
+020 0018 00082
+040 0023 00100
+100 0033 00123
+245 0066 00156
+250 0011 00222
+260 0046 00233
+300 0035 00279
+504 0039 00314
+541 0132 00353
+650 0023 00485
+653 0025 00508
+700 0017 00533
+942 0015 00550
+945 0020 00565
+999 0017 00585 //a prtir de abajo de esto arrancan los datos, el primer caracter especial me indica que ahi arrancan los datos y despues se van poniendo mas caracteres especiales para dividir cada dato
+AR_CdUFM20160503150707.0111121s2015    nju||||| |||| 00| 0 eng d  a013359162X  a9780133591620  aAR_CdUFMcAR_CdUFM1 aTanenbaum, Andrew S.,d1944-10aModern operating systems /cAndrew S. Tanenbaum, Herbert Bos.  a4a ed.  aNew Jersey : bPearson Education, c2015.  axxvi, 2001 p. :bil. ;c25 cm.  aIncluye bibliografía e índice.  aCiencia y Técnica de Edwin Ventura Oscanova ;cCompra Programa de Bibliotecas 2015 ; d2016-05-03 ;e22577 ;h$3.900 ;oLibro 4aOperating systems.  aSistemas operativos.1 aBos, Herbert  cLIBRO2CCS  aMCRd2016-05-03  c17560d1755800756nam a22002417a 4500003000900000005001700009008004000026020001800066040001300084100003100097245009200128250001100220260002400231260002600255300003200281500006100313504004200374650002500416650002300441942001300464945002000477999001700497AR_CdUFM20160908124434.0100610s2007    sp||||| |||| 00| 0 spa d  a9788420544625  aAR_CdUFM1 916474aStallings, William.10aSistemas operativos :baspectos internos y principios de diseño /cWilliam Stallings.  a5a ed.  aMadrid :bPearson :  bPrentice-Hall,c2007.  axx, 848 p. :bil. ;c25 cm.  aTítulo de la edición en inglés: Operating systems.  aIncluye referencias bibliográficas. 4aSistemas operativos. 4aOperating systems.  cLIBRO2   aMCRd2010-06-10  c15422d1542100896nam a22002657a 4500999001500000003000900015005001700024008004000041020001500081040002300096100003300119245011600152250001200268260006000280300002100340541007600361590003000437650002500467650002300492700003000515700003000545942001500575945002000590945002000610  c2417d2417AR_CdUFM20161212145929.0111121s1994    sp||||| |||| 00| 0 spa d  a0201518759  aAR_CdUFMcAR_CdUFM1 915995aSilberschatz, Abraham10aSistemas operativos : bconceptos fundamentales / cAbraham Silberschatz, James L. Peterson, Peter Baer Galvin.  a3a. ed.  aBuenos Aires : bAddison-Wesley iberoamericana, c1994.  a727 p. ;c25 cm.  aDonación de Mariano Javier Arselán ; d2016-12-12 ;e22761 ;oLibro  aLa Biblioteca posee 4 ej. 4aSistemas operativos. 4aOperating systems.1 913351aPeterson, James L.1 95800aGalvin, Peter Baer.  cLIBRO2CCS  aMCRd2011-11-21  aMCRd2016-12-12
+
+si no me equivoco el caracter especial es 0x1F
+

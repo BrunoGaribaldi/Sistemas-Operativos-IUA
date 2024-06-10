@@ -1,0 +1,81 @@
+Sistemas Operativos - Administración de memoria - Asignación contigua
+---------------------------------------------------------------------
+
+Simulación - Comparación de métodos de asignación
+
+Objetivo
+--------
+Implementar y evaluar los siguientes métodos de asignación de memoria
+escribiendo un simulador:
+
+	* Particiones fijas 
+		- mismo tamaño
+		- distinto tamaño
+	* Particiones dinámicas con
+		- primer ajuste 	first fit
+		- mejor ajuste 		best fit
+		- peor ajuste		worst fit
+
+Tarea
+-----
+Dado un conjunto de procesos a ser ubicados, su programa debe simular la asignación 
+de memoria a esos procesos basada en el método de asignación. 
+
+La simulación debe recolectar las siguientes estadísticas:
+	* fragmentación interna promedio
+	* fragmentación externa promedio
+	* fallos de asignación
+	* uso de memoria
+
+Al final deberá comparar los siguientes métodos de asignación:
+	1. particiones de igual tamaño (PI)
+	2. particiones de diferente tamaño (PD)
+	3. particiones dinámicas con primer ajuste (DPA)
+	4. particiones dinámicas con mejor ajuste (DFF)
+	5. particiones dinámicas con peor ajuste (DWF)
+
+Ejecución
+---------
+Su deberá simulador será invocado como:
+	./sim -v -a <algoritmo> input_file
+
+donde "-v" implica modo verboso, "-a" selecciona el algoritmo (PI,PD,DPA,DFF,DWF), y el archivo de input contiene los "procesos" a acomodar.
+
+Formato de entrada
+------------------
+
+Asuma un máximo de memoria, por ejemplo 64MB. 
+Si un proceso no puede ser ubicado debe incrementar los fallos en una unidad. 
+Para particiones fijas de igual tamaño asuma un tamaño para cada partición, por ejemplo 8MB. El SO siempre tomará 8MB.
+Para particiones dinámicas asuma algún tamaño para cada partición, reserve una de 8 MB para el SO.
+Asuma que cada proceso nunca será de más de 8 MB.
+
+La simulación debe incluir 
+	* el número de procesos que ingresa al sistema, 
+	* y para cada proceso 
+		- el tiempo de arribo, 
+		- el tamaño y 
+		- el tiempo de finalización
+
+Asuma que en el archivo de entrada (input) los procesos se listan en el orden que arriban, todos los parámetros son enteros.
+El formato sería
+
+	nro. de procesos
+	proc_num tiempo_arribo tamaño tiempo_final
+
+Ej.
+
+4
+1 0 2 50
+2 12 8 80
+3 27 1 180
+4 28 7 100
+
+Debe crear su propio archivo de entrada.
+
+Salida
+------
+Muestre al finalizar las estadísticas solicitadas, puede guardarlas en un archivo.
+
+
+

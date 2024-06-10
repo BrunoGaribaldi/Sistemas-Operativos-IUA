@@ -1,0 +1,268 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+int fifo(int referencia[], int marco[], int nMarcos);
+int lru(int referencia[],int marco[], int nMarcos, int reciente[]);
+int opt(int referencia[],int marco[], int nMarcos);
+
+int main (int argc, char const *argv[]){
+    char line[256]; 
+    int nMarcos = 0, referencia[30];
+    FILE *archivo;
+    int marco3[3] = {10}, marco4[4] = {10}, marco6[6] = {10};
+    //Lectura del archivo
+    archivo = fopen(argv[3], "r"); 
+    if(archivo == NULL){
+        printf("No se pudo abrir\n");
+    }else{
+        printf("Se pudo abrir\n");
+    }
+
+    if(fgets(line,sizeof(line), archivo) != NULL){//Lee la primera linea
+        nMarcos = atoi(line);
+    }else{
+        printf("Error al leer la primera linea\n");
+        fclose(archivo);
+    }
+    if(fgets(line, sizeof(line), archivo) != NULL){
+        if(strlen(line) >= 30){//Lee la segunda linea
+            for(int i = 0; i < 30; i++){
+                referencia[i] = line[i] - '0';
+            }
+        }else{
+            printf("La segunda linea no tiene 30 caracteres\n");
+            fclose(archivo);
+        }
+    }else{
+        printf("Error al leer la segunda linea\n");
+        fclose(archivo);
+    }
+    fclose(archivo);  
+    // Impresion del archivo
+    printf("Nro marcos: %d\n", nMarcos);
+    for(int i = 0; i < 30; i++){
+        printf("%d\t", referencia[i]);
+    }
+    printf("\n");  
+    if(strcmp(argv[2],"FIF") == 0){
+        printf("Algoritmo: FIFO\n");
+        switch (nMarcos){
+            case 3:
+
+                printf("\nLa cantidad de fallos es: %d\n",fifo(referencia,marco3,nMarcos));
+            break;
+            case 4:
+
+                printf("\nLa cantidad de fallos es: %d\n",fifo(referencia,marco4,nMarcos));
+            break;
+            case 6:
+
+                printf("\nLa cantidad de fallos es: %d\n",fifo(referencia,marco6,nMarcos));
+            break;
+            default:
+                printf("Cantidad de marcos incorrecta\n");    
+            break;
+        }
+    }else if(strcmp(argv[2],"LRU") == 0){
+        int reciente3[3], reciente4[4], reciente6[6];
+        printf("Algoritmo: LRU\n");
+        switch (nMarcos){
+            case 3:
+
+                printf("\nLa cantidad de fallos es: %d\n",lru(referencia, marco3, nMarcos, reciente3));
+            break;
+            case 4:
+                // printf("Llamada a lru con marco4 y reciente4\n");
+                printf("\nLa cantidad de fallos es: %d\n",lru(referencia, marco4, nMarcos, reciente4));
+            break;
+            case 6:
+                // printf("Llamada a lru con marco6 y reciente6\n");
+                printf("\nLa cantidad de fallos es: %d\n",lru(referencia, marco6, nMarcos, reciente6));
+            break;
+            default:
+                printf("Cantidad de marcos incorrecta\n");    
+            break;
+        }
+    }else{
+        printf("Algoritmo: OPTIMO\n");
+        switch (nMarcos){
+            case 3:
+        
+                printf("\nLa cantidad de fallos es: %d\n",opt(referencia,marco3,nMarcos));
+            break;
+            case 4:
+             
+                printf("\nLa cantidad de fallos es: %d\n",opt(referencia,marco4,nMarcos));
+            break;
+            case 6:
+         
+                printf("\nLa cantidad de fallos es: %d\n",opt(referencia,marco6,nMarcos));
+            break;
+            default:
+                printf("Cantidad de marcos incorrecta\n");    
+            break;
+        }
+    }
+
+}
+
+int fifo(int referencia[], int marco[], int nMarcos){
+    int cWhile = 0, mViejo = 0, limite = nMarcos-1, fallos = 0;
+    for(int i = 0; i < 30; i++){
+        printf("\nBuscamos: %d\t", referencia[i]);
+        int cont = 0;
+        while(referencia[i] != marco[cWhile] && cont != limite){
+            if(cWhile == (nMarcos-1)){
+                cWhile = 0;
+            }else{
+                cWhile++;
+            }
+            cont++;
+        }
+        if(referencia[i] == marco[cWhile]){
+            printf("\t--> %d\t", referencia[i]);
+            printf("En marco: %d\t", cWhile);
+        }else if(cont == limite){
+            marco[mViejo] = referencia[i];
+            if(mViejo == (nMarcos-1)){
+                mViejo = 0;
+            }else{
+                mViejo++;
+            }
+            printf("\tX-> %d\t", referencia[i]);
+            printf("En marco: %d\t", mViejo);
+            fallos++;
+        }
+    }
+return fallos;
+}
+int lru(int referencia[],int marco[], int nMarcos, int reciente[]){
+    int cWhile = 0, mViejo, tMayor = 0, limite = nMarcos-1, fallos = 0, mLlenos = 0;
+    for(int i = 0; i < 30; i++){
+        printf("\nBuscamos: %d\t", referencia[i]);
+        int cont = 0;
+        while(referencia[i] != marco[cWhile] && cont != limite){
+            if(cWhile == (nMarcos-1)){
+                cWhile = 0;
+            }else{
+                cWhile++;
+            }
+            cont++;
+        }
+        if(referencia[i] == marco[cWhile]){
+            printf("\t--> %d\t", referencia[i]);
+            printf("En marco: %d\t", cWhile);
+            for(int j = 0; j < nMarcos; j++){
+                reciente[j]++;
+            }
+            reciente[cWhile] = 0;
+        }else{
+            if(mLlenos < nMarcos){
+                marco[mLlenos] = referencia[i];
+                mLlenos++;
+                for(int j = 0; j < nMarcos; j++){
+                    reciente[j]++;
+                }
+                reciente[mLlenos-1] = 0;
+                printf("\tX-> %d\t", referencia[i]);
+                printf("En marco: %d\t", (mLlenos-1));
+                fallos++;
+            }else{
+                tMayor = 0;
+                for(int j = 0; j < nMarcos; j++){
+                    if(tMayor < reciente[j]){
+                        tMayor = reciente[j];
+                        mViejo = j;
+                        reciente[j]++;
+                    }else{
+                        reciente[j]++;
+                    }
+                }
+                marco[mViejo] = referencia[i];
+                reciente[mViejo] = 0;
+                printf("\tX-> %d\t", referencia[i]);
+                printf("En marco: %d\t", mViejo);
+                fallos++;
+            }
+        }
+    }
+    return fallos;
+}
+int opt(int referencia[],int marco[], int nMarcos){
+    int cantVeces[8] = {0}, id = 0, rep0 = 0, rep1 = 0, pMax[2];
+    for(int i = 0; i < 30; i++){
+        id = referencia[i];
+        cantVeces[id]++; //almacenamos las veces que se repite cada pagina
+    }
+    for(int i = 0; i < 8; i++){
+        if(cantVeces[i] > rep0){
+            pMax[1] = pMax[0];
+            rep1 = rep0;
+            pMax[0] = i;
+            rep0 = cantVeces[i];
+        }
+    }
+    marco[0] = pMax[0];
+    marco[1] = pMax[1];
+    printf("\nrep0: %d, rep1: %d\n",rep0, rep1);
+    printf("En marco0: %d\t En marco1: %d",marco[0], marco[1]);
+    //Misma idea que con fifo pero las dos pag con mas repeticiones ya van a estar cargadas
+    int cWhile = 0, mViejo = 2, limite = nMarcos-1, fallos = 0;
+    for(int i = 0; i < 30; i++){
+        printf("\nBuscamos: %d\t", referencia[i]);
+        int cont = 0;
+        while(referencia[i] != marco[cWhile] && cont != limite){
+            if(cWhile == (nMarcos-1)){
+                cWhile = 0;
+            }else{
+                cWhile++;
+            }
+            cont++;
+        }
+        if(referencia[i] == marco[cWhile]){
+            printf("\t--> %d\t", referencia[i]);
+            printf("En marco: %d\t", cWhile);
+            if(referencia[i] == pMax[0]){
+                rep0--;
+            }else if(referencia[i] == pMax[1]){
+                rep1--;
+            }
+        }else if(cont == limite){
+            marco[mViejo] = referencia[i];
+            if(rep0 == 0 && rep1 == 0){
+                if(mViejo == (nMarcos-1)){
+                    mViejo = 0;
+                }else{
+                    mViejo++;
+                }
+            }else if(rep0 == 0 && rep1 != 0){
+                if(mViejo == 0){
+                    mViejo = 2;
+                }else if(mViejo == (nMarcos-1)){
+                    mViejo = 0;
+                }else{
+                    mViejo++;
+                }
+            }else if(rep0 != 0 && rep1 == 0){
+                if(mViejo == (nMarcos-1)){
+                    mViejo = 1;
+                }else{
+                    mViejo++;
+                }
+            }else{
+                if(mViejo == (nMarcos-1)){
+                    mViejo = 2;
+                }else{
+                    mViejo++;
+                }
+            }
+            printf("\tX-> %d\t", referencia[i]);
+            printf("En marco: %d\t", mViejo);
+            fallos++;
+        }
+        printf("\nrep0: %d, rep1: %d\n",rep0, rep1);
+        printf("En marco0: %d\t En marco1: %d",marco[0], marco[1]);
+    }
+    return fallos;
+}

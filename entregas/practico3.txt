@@ -1,0 +1,125 @@
+//manejor de archivos
+1)#include <stdio.h>
+int main(int argc, char *argv[]){
+for ( int i = 0; i < argc; i++ ) {
+    printf("\n%s\n",argv[i]);
+}
+return 0;
+}
+
+2) para crear archivo--> ls -l / > nombrearchivodondequeresguardarellistado
+/ es el directorio que vos queres hacerle el ls
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include<stdio.h>
+#define MAX 256
+
+int main(){
+    char buffer [MAX];
+    ssize_t n; 
+    int fd = open("listado.txt",O_RDONLY);
+    
+    while(n = read(fd , buffer , MAX ) > 0 ){
+         printf("%s",buffer);
+    }
+       
+    close(fd);
+    return 0;
+}
+
+//la cosa es asi. vos declar un arreglo buffer de un tamaño determinado. En ese arreglo
+//se van a ir guardando los elemtos que vaya leyendo.
+//n es la cantidad de elementos que leyo. EN un principio, n va a ir valiendo 256 hasta que vaya llegando
+// al final y no queden 256. N=0 al final del bicho
+
+3)//ejercicio 3
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+
+int main() {
+
+    DIR *dir; 
+
+    struct dirent *entry;
+
+    dir = opendir("/");
+
+    while ((entry = readdir(dir)) != NULL) {
+
+        printf("%s\n", entry->d_name);
+
+    }
+
+    closedir(dir);
+
+    return 0;
+}
+/*
+La cosa es asi. 
+La función opendir() en C se utiliza para abrir 
+un directorio en un sistema de archivos. 
+Toma como argumento una cadena de caracteres 
+que representa la ruta del directorio que se desea abrir. 
+Retorna un puntero a una estructura de tipo DIR, 
+que se utiliza luego para leer los contenidos del 
+directorio utilizando otras funciones como readdir().
+
+La función readdir() en C se utiliza para leer la 
+siguiente entrada de un directorio abierto previamente 
+utilizando la función opendir(). Toma como argumento
+un puntero a una estructura DIR que representa el
+directorio abierto previamente por opendir(). 
+Retorna un puntero a una estructura de tipo struct
+dirent que contiene información sobre el siguiente
+archivo o subdirectorio dentro del directorio.
+
+struct dirent *entry; entry es un puntero a una estructura struct dirent que 
+contendrá información sobre el siguiente archivo o subdirectorio dentro del printf("Nombre del archivo: %s\n", en
+directorio representado por dir.
+
+entry es un puntero a una estructura struct dirent que contendrá información sobre 
+el siguiente archivo o subdirectorio dentro del directorio representado por dir.
+
+printf("Nombre del archivo: %s\n"
+cuanAcceso a la información del archivo: Si readdir() no ha llegado al final del directorio, 
+puedes acceder a la información del archivo o subdirectorio utilizando el puntero entry que
+retornó readdir(). Por ejemplo, puedes obtener el nombre del archivo utilizando el campo d_name 
+de la estructura struct dirent.do se llega al final del directorio, entry = null
+
+
+*/
+
+4) 
+//open devuelve positivo si lo puede abrir o -1 si no lo puede abrir
+//Usará open() dos veces, una el leer el archivo origen y otra
+//al crear y escribir en el archivo de destino.
+//ejercicio 4
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include<stdio.h>
+#define MAX 256
+
+int main(int argc, char *argv[]){ //argv[] va a tener el contenido del nombre del archivo por consola
+char buffer [MAX];
+ssize_t n; 
+ssize_t w;
+int fd = open(argv[1],O_RDONLY);//argv[1] va a contener el nombre del archivo
+int destino = open("test.txt", O_RDWR|O_CREAT, 0644);
+
+while((n = read(fd , buffer , MAX )) > 0 ){
+        w = write(destino , buffer , n);
+}
+
+close(fd);
+close (destino);
+
+return 0;
+
+}
+
+5) //hacer

@@ -1,0 +1,173 @@
+1)
+para este ejercicio podes hacer dos coass. 
+usar la funcion access
+o usar la funcion open solo en lectura.
+*/
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+int main(int argc, char *argv[]){
+int fd; 
+
+while (fd = open(argv[1], O_RDONLY) < 0){
+    sleep(1);
+}
+printf("se ha abierto tu archivo");
+
+close(fd);
+
+return 0; 
+}
+2) /*
+Finalizar un programa utilizando el contenido de un archivo externo
+Similar al anterior, pero ahora queremos 'ver' que contiene el archivo.
+Si contiene un valor '1' entonces prosigue
+Si contiene el valor '0' termina
+*/
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 1
+int main(int argc, char *argv[]){
+int fd; 
+char buffer [MAX];
+ssize_t n;
+int flag = 1; 
+while (flag){
+    fd = open(argv[1], O_RDONLY);
+    n = read(fd , buffer , MAX );
+    flag = atoi(buffer);
+}
+
+printf("terminando programa");
+
+close(fd);
+
+return 0; 
+}
+3)
+//PROCESO A
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#define MAX 1
+int main(){
+int fd; 
+char buffer [MAX];
+ssize_t n;
+int flag = 1; 
+while (1){
+    fd = open("compartido.txt", O_RDONLY);
+    n = read(fd , buffer , MAX );
+    //flag = atoi(buffer);
+    if(buffer[0] == '0'){
+        printf("\n Cero leido en archivo");
+        exit(1);
+    }
+}
+
+printf("terminando programa");
+
+close(fd);
+
+return 0; 
+}
+//PROCESO B
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+
+int main() {
+    FILE *file;
+    
+    // Espera 5 segundos antes de escribir en el archivo compartido
+    sleep(5);
+
+    file = fopen("compartido.txt", "w");
+    if (file == NULL) {
+        perror("Error al abrir el archivo compartido");
+        exit(EXIT_FAILURE);
+    }
+    printf("\nEScribiendo un cero en archivo");
+    fprintf(file, "0"); // Escribir '1' en el archivo compartido
+    fclose(file);
+
+    return 0;
+}
+
+4) este no compra, revisar.
+//PROCESO A
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#define MAX 10
+int main() {
+    FILE *file;
+    
+    // Espera 5 segundos antes de escribir en el archivo compartido
+    sleep(5);
+    int mensaje = 10;
+    file = fopen("compartido.txt", "w");
+    if (file == NULL) {
+        perror("Error al abrir el archivo compartido");
+        exit(EXIT_FAILURE);
+    }
+    printf("\nEsribiendo en el archivo");
+    fprintf(file, mensaje); // Escribir '1' en el archivo compartido
+    fclose(file);
+    int fd; 
+    char buffer [MAX];
+    while (1){
+    fd = open("compartido.txt", O_RDONLY);
+    read(fd , buffer , MAX );
+        if(buffer[0] != mensaje){ //espera a que B escriba un mensaje
+            printf("\n Se ha leido el mensaje del proceso B. Este dice: %d",buffer[0]);
+            break;
+        }
+    }
+    return 0;
+}
+//PROCESO B
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define MAX 10
+int main(){
+int fd; 
+char buffer [MAX];
+int mensaje2 = 19; 
+while (1){
+    fd = open("compartido.txt", O_RDONLY);
+    read(fd , buffer , MAX );
+    //flag = atoi(buffer);
+    if(strlen(buffer) == 0){ //espera a que A escriba un mensaje
+        printf("\n Se ha leido el mensaje del proceso A. Este dice: %d",buffer[0]);
+        break;
+    }
+}
+close(fd);
+fd = open("compartido.txt", O_WRONLY);
+write(fd,mensaje2,2);
+
+
+close(fd);
+
+return 0; 
+}

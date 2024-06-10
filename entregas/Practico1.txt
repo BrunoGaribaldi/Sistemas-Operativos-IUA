@@ -1,0 +1,153 @@
+//ejercicio 2
+#include <stdio.h>
+#include <unistd.h>
+int main() {
+	int pid;
+	
+	pid = fork();
+	if (pid == 0) {
+		/* hijo */
+		printf("soy el hijo");
+	} else {
+	/* padre */
+	printf("soy el padre");
+	}
+	return 0;
+}
+
+//ejercicio 3
+#include <stdio.h>
+#include <unistd.h>
+int main() {
+	int pid;
+	
+	pid = fork();
+	if (pid == 0) {
+		/* hijo */
+		printf("soy el hijo, mi ID es %d y mi padre es %d",getpid(),getppid());
+	} else {
+	/* padre */
+	printf("soy el padre, mi ID es %d, mi padre es %d",getpid(),getppid());
+	}
+	return 0;
+}
+
+//ejercicio 4
+//aclaraicon: //wait(&status)--> va a hacer que espere hasta que status cambie de valor.system call suspends execution of the calling thread until one of its children terminates
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <unistd.h>
+int main() {
+	int pid;
+	int status;
+	
+	pid = fork();
+	if (pid == 0) {
+		/* hijo */
+		printf("soy el hijo, mi ID es %d\n",getpid());
+        printf("durmiendo....");
+        sleep(10);
+        printf("Proceso hijo terminado\n");
+        exit(EXIT_SUCCESS); // Salir del proceso hijo
+	} else {
+	/* padre */
+	printf("soy el padre, mi ID es %d",getpid());
+    wait(&status);
+    printf(%d, WEXITSTATUS(status)); //devuelve distinto de cero si el hijo termino correctamente o cero si termino anormalmente.
+	}
+	return 0;
+}
+
+
+//ejercicio 6
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+
+void sigmanager(int sig_num) {
+    // Manejador de señales
+    switch(sig_num) {
+        case SIGINT:
+            printf("\nSe ha presionado Ctrl-C (SIGINT).\n");
+            break;
+        case SIGTSTP:
+            printf("\nSe ha presionado Ctrl-Z (SIGTSTP).\n");
+            exit(EXIT_SUCCESS); //indica que el programa finalizó correctamente.
+            break;
+    }
+}
+
+int main() {
+    // Asignar la señal SIGINT al manejador de señales
+    signal(SIGINT, sigmanager); //cuando presionas ctrl c. Para Suspender al proceso.
+    // Asignar la señal SIGTSTP al manejador de señales
+    signal(SIGTSTP, sigmanager); //cuando presionas ctrl z. para matar  el proceso
+
+    printf("Presione Ctrl-C para imprimir un mensaje.\n");
+    printf("Presione Ctrl-Z para terminar el programa.\n");
+
+    // Mantener el programa en ejecución
+    while(1) {
+    }
+
+    return 0;
+}
+
+//ejercicio 7 //no funciona
+/*Escriba un programa que cree un hijo, capture las mismas señales 
+del programa anterior, se las reenvie al hijo y reproduzca la 
+funcionalidad previa, es decir que el hijo escriba un mensaje para 
+la primer señal y termine para la segunda, al terminar el hijo también 
+debe terminar el padre.*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
+int pid;
+
+void sigmanagerh(int signum){
+
+    if(signum == SIGINT){
+           printf("ha presionado ctrl+c\n");
+        }else{
+            printf("matando al hijo\n");
+            exit(0);
+        }
+}
+void sigmanager(int sig_num) {
+    //padre
+        if(sig_num == SIGINT){
+            kill(pid, SIGINT); //ctrl+c
+        }else{
+            kill(pid, SIGTSTP);//ctrl+z
+        }
+}
+int main (void){
+    pid = fork();
+    int status;
+    if (pid == 0){
+        // hijo
+        signal(SIGINT, sigmanagerh);
+        signal(SIGTSTP, sigmanagerh);
+        while(1){
+            printf(".\n");
+            sleep(1);
+        }
+    }else{
+        //padre
+        signal(SIGINT, sigmanager);
+        signal(SIGTSTP, sigmanager);
+        wait(&status);
+        printf("Matando proceso padre");
+        exit(0);
+    }
+    return (0);
+}

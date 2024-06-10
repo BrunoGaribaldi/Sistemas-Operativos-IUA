@@ -1,0 +1,95 @@
+Sistemas Operativos - Administración de memoria - Paginación
+------------------------------------------------------------
+
+Simulación - Comparación de métodos de reemplazo de página
+
+Objetivo
+--------
+Simular el administrador de reemplazo de páginas del sistema operativo
+evaluando los siguiente tres algoritmos de reemplazo de páginas
+
+	a. First In First Out (FIFO)
+	b. Least Recently Used (LRU)
+	c. Algoritmo Optimo
+
+Tarea
+-----
+Debe implementar los tres algoritmos y realizar un análisis de performance
+de ellos basado en la medida de los *fallos de página* para cada algoritmo
+utilizando entradas múltiples.
+
+Debe mostrar qué página se encuentra dentro de cada marco junto con el string
+de referencia e indicar cuando ocurre un fallo de página, por ejemplo
+
+M 01214...
+1 00004
+2 -1111
+3 --222
+F *** *
+
+El programa deberá leer el string de referencia y el número de marcos de un
+archivo generado por usted.
+Asuma que:
+	a) El largo del string de referencia es siempre 30, ej. 602365045543515311725767234206
+	b) hay 8 páginas, de 0 a 7
+
+Deberá generar 10 casos de testeo, esto es 10 strings de referencia de largo
+30. Se le requiere que analice cada string usando los tres algoritmos y con
+NumeroDeMarcos (3, 4, y 6) marcos de página.
+
+Cada archivo tendrá dos líneas, el número de marcos y el string, por ejemplo
+4
+245542410404634715712171577654
+
+Puede generar los archivos como quiera, por ejemplo utilizando el siguiente
+onliner (si lo usa entienda que es lo que hace!)
+
+for SET in {01..10}; do \
+  STR=$(for i in {1..30}; do DIV=$((7+1)); R=$(($RANDOM%$DIV)); echo -n $R; done); \
+  for FRM in 3 4 6; do \
+    file="SET$SET-$FRM.dat"; echo -e "$FRM\n$STR" > $file; \
+  done; \
+done
+
+Ejecución
+---------
+El simulador será invocado como:
+
+	./sim -a <algoritmo> input_file
+
+donde "-a" selecciona el algoritmo (FIFO,LRU,OPT) y el archivo de input
+contiene el número de marcos y el string de referencia
+
+La salida será por pantalla mostrando el estado de los marcos junto con
+el string de referencia similar a como se ejemplificó previamente
+
+También deberá guardar en un archivo común (en modo append) el algoritmo,
+número de marcos y número de fallos de página, estos datos se utilizarán
+para el análisis estadístico
+
+Puede realizar toda la simulación ejecutando otro oneliner
+
+for alg in FIFO LRU OPT; do for file in *.dat; do ./sim -a $alg $file; done; done
+
+
+Análisis
+--------
+El resultado final de la simulación se presentará de forma sencilla.
+Si calculamos el promedio de fallos de página para cada algorítmo y
+número de marcos P_a_i, entonces puede utilizar una tabla por ejemplo
+
+       3    4    6
+FIFO  P_f3 P_f4 P_f5
+LRU   P_l3 P_l4 P_l5 
+OPT   P_o3 P_o5 P_o5
+
+Debe indicar si observa la anomalía de Belady!
+
+Hint: Si guarda los resultados tabulados o separados por coma (archivo
+CSV) puede abrirlo en una planilla y hacer los cálculos necesarios.
+
+Nota
+----
+Intente probar con una string de referencia para la cual sepa el número
+de fallos de página para verificar que todo funciona correctamente
+

@@ -1,0 +1,60 @@
+/*
+    productor consumidor con semaforos.
+*/
+#include <stdio.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include <stdio.h>
+#include <pthread.h>
+#define N 100
+
+sem_t mutex,empty,full;
+
+int buffer = 0; 
+
+void *producer (void *arg){
+
+    while(1){
+        printf("\nProductor produciendo...");
+        sem_wait(&empty);
+        sem_wait(&mutex); //entra a region critica.
+        buffer++; //inserto un valor en el buffer.
+        printf("\n(en productor)Datos en buffer: %d",buffer);
+        sleep(1);
+        sem_post(&mutex);
+        sem_post(&full);
+    }
+    pthread_exit(0);
+}
+
+void *consumer (void *arg){
+
+    while(1){
+        printf("\nProductor consumidor...");
+        sem_wait(&full);
+        sem_wait(&mutex);
+        buffer--;
+        printf("\n(en consumidor)Datos en buffer: %d",buffer);
+        sleep(1);
+        sem_post(&mutex); 
+        sem_post(&empty);
+
+    }
+    pthread_exit(0);
+}
+
+int main(){
+
+sem_init(&mutex,0,1);
+sem_init(&empty,0,N);
+sem_init(&full,0,0);
+
+pthread_t productor;
+pthread_t consumidor;
+pthread_create(&productor,NULL,producer,NULL);
+pthread_create(&consumidor,NULL,consumer,NULL);
+
+pthread_exit(NULL);
+
+return 0;
+}

@@ -1,0 +1,39 @@
+Sistemas Operativos - Comunicación entre procesos (1)
+-----------------------------------------------------
+
+Todo proceso 'trabaja' con valores que tiene en su memoria.
+Estos valores los puede 'leer' de archivos externos.
+
+Desde el punto de vista de un proceso un 'archivo' es algo
+que accede utilizando un 'file descriptor' como el que se 
+obtiene por medio de la llamada al sistema open().
+
+Vamos a probar diferentes maneras de comunicarnos o comunicar 
+entre si procesos utilizando diferentes tipos de mecanismos
+que desde el punto de vista del proceso son casi todos como
+leer/escribir archivos.
+
+1) Finalizar un programa utilizando un archivo externo
+Escriba un programa que verifique periódicamente la
+existencia de un archivo (nombre a elección)
+Si descubre que existe entonces termina.
+
+2) Finalizar un programa utilizando el contenido de un archivo externo
+Similar al anterior, pero ahora queremos 'ver' que contiene el archivo.
+Si contiene un valor '1' entonces prosigue
+Si contiene el valor '0' termina
+
+3) Hacer que un proceso finalice a otro
+Variante de los anteriores, pero esta vez tenemos dos procesos, A y B
+A funciona como en 2
+B espera un cierto tiempo y luego escribe el archivo esperado por A
+
+4) Intercambio de mensajes entre dos procesos utilizando un archivo
+Sean dos procesos, A y B, los cuales van a 'hablar'entre si
+El proceso A crea un archivo, ej. comunicador.txt, y escribe dentro de el 
+un mensaje. Luego lee periodicamente el archivo y espera que el mensaje 'cambie',
+cuando descubre que ha cambiado termina.
+
+El proceso B verifica que exista el archivo anterior, cuando lo encuentra lo lee,
+luego lo sobreescribe con un mensaje de respuesta, cierra el archivo y termina.
+

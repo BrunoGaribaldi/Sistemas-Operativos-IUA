@@ -1,0 +1,107 @@
+/*
+1) Cliente-Servidor con archivos. Exploraremos la posibilidad de "comunicar" 
+dos procesos mediante archivos externos. Escriba un programa que "cree" dos
+archivos, a-inout y b-inout. Luego deberá crear dos hijos, cada hijo deberá 
+abrir los archivos PERO de modo que el primer hijo abra "a" para lectura y 
+"b" para escritura, en cambio el segundo abrira "a" para escritura y "b"
+para lectura. Una vez realizado esto el primer hijo debera obtener la hora
+del sistema (usando ctime()), escribirá esta informacion en "b", cuando esto
+ocurra, el segundo proceso hijo obtendra a su vez la hora al leera de 
+"b", y la mostrara por pantalla. Al finalizar ambos procesos hijos,
+el padre deberá reportar el estado de terminacion.
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <string.h>
+#include <unistd.h>
+#include <wait.h>
+#define TAM 50
+
+int main(){
+    int a_inout = open("a-inout.txt", O_CREAT, 0644);
+    int b_inout = open("b-inout.txt", O_CREAT, 0644);
+    pid_t pid1, pid2;
+    time_t ltime;
+    time(&ltime); 
+    char mensaje[TAM], buffer[TAM];
+    strcpy(mensaje, ctime(&ltime));
+    pid1 = fork();
+    int status;
+
+    if (pid1==0){
+        a_inout = open("a-inout.txt", O_RDONLY);
+        b_inout = open("b-inout.txt", O_RDWR);
+        write(b_inout, mensaje, strlen(mensaje));
+        close(a_inout);        
+        close(b_inout);  
+        exit(1);    
+    } else {  
+
+        wait(&status);  
+        pid2 = fork();
+        if(pid2==0){
+
+            b_inout = open("b-inout.txt", O_RDONLY);
+            a_inout = open("a-inout.txt", O_RDWR);
+            read(b_inout, buffer, TAM);
+            printf("%s", buffer);
+            close(a_inout);        
+            close(b_inout);   
+        }
+    }
+    return 0;
+}
+
+/*
+Cliente-Servidor con pipes sin nombre. Escribiremos un programa que
+creara dos hijos los cuales se comunicaran utilizando pipes sin nombre.
+Uno de los hijos obtiene la hora del sistema como antes, y envía ese dato
+utilizando pipes. El segundo recibe los datos y los muestra por pantalla.
+
+en código:
+	int pd[2];					declaro
+	pipe(pd);					creo
+	read( pd[0], buff, max );	 leo
+	write( pd[1], buff, max );	escribo
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <time.h>
+#include <string.h>
+#include <unistd.h>
+#define TAM 50
+
+int main(){
+    pid_t pid1, pid2;
+    time_t ltime;
+    char buffer[TAM];
+    int status;
+    int pd[2];
+    pipe(pd);
+    pid1 = fork();
+    if (pid1==0){
+        char mensaje[TAM];
+        time(&ltime); 
+        strcpy(mensaje, ctime(&ltime));
+        write(pd[1], mensaje, TAM);
+        exit(1);    
+    } else {  
+        pid2 = fork();
+        if(pid2==0){
+            read( pd[0], buffer, TAM);
+            printf("%s", buffer);
+        }
+        else {
+            sleep(1);
+        }
+    }
+    return 0;
+}
